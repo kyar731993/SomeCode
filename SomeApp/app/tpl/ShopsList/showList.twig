@@ -1,0 +1,58 @@
+{% extends "index.twig" %}
+
+{% block meta_title %}Список сайтов для рассылки{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="header"><h2>Список сайтов</h2></div>
+        <div class="showAll"> <a class="btn btn-primary large showAll_btn" href="//test.dev/admin/shops-list/showall" target="_blank">Показать все</a></div>
+        <div class="link"><a class="form_link" href="//test.dev/admin/shops-list/form">test.dev/admin/shops-list/form</a></div>
+        <table class="table table-hover">
+            <thead>
+            <tr>
+                <th>Адрес сайта</th>
+                <th>Вид деятельности</th>
+                <th>Email</th>
+                <th>Телефон</th>
+                <th>Добавил</th>
+                <th>Дата добавления</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for shopInfo in shopsList %}
+                <tr>
+                    <td>{{ shopInfo.address }}</td>
+                    <td>{{ shopInfo.kind_of_activity }}</td>
+                    <td>{{ shopInfo.email }}</td>
+                    <td>{{ shopInfo.phone }}</td>
+                    <td>{{ shopInfo.created_by }}</td>
+                    <td>{{ shopInfo.date_of_creation|date("d-m-Y H:i:s") }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
+
+{% block css %}
+    <style>
+        h2 {
+            display: inline-block;
+        }
+        .form_link{
+            float: right;
+            margin: 20px 20px 0 0;
+            font-size: 18px;
+        }
+        .showAll_btn {
+
+        }
+        .header, .showAll, .link {
+            width: 33%;
+            display: inline-block;
+        }
+        .showAll {
+            text-align: center;
+        }
+    </style>
+{% endblock %}

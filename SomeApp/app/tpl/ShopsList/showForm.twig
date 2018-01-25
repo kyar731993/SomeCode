@@ -1,0 +1,149 @@
+{% extends "index.twig" %}
+
+{% block meta_title %}Форма добавления сайтов в рассылку{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="results" id="results"></div>
+    </div>
+
+    <form action="" method="post">
+        <fieldset class="form-group check_url">
+            <label for="addressSite">Проверка адреса сайта:</label>
+            <input type=text id="addressSite" class="form-control" placeholder="http://test.ru/">
+
+            <button type="button" id="checkFormBtn" class="btn btn-primary large">Проверить</button>
+        </fieldset>
+
+        <div id="fullForm" class="hidden full_form">
+            <fieldset class="form-group">
+                <label for="formGroupExampleInput2">Вид деятельности:</label>
+                <input type=text id="kindOfActivitiesSite" class="form-control" placeholder="информационная">
+            </fieldset>
+
+            <fieldset class="form-group">
+                <label for="formGroupExampleInput2">Email:</label>
+                <input type=text id="emailSite" class="form-control" placeholder="test@test.ru">
+            </fieldset>
+
+            <fieldset class="form-group">
+                <label for="formGroupExampleInput2">Телефон:</label>
+                <input type=text id="phoneSite" class="form-control" placeholder="89999999999">
+            </fieldset>
+
+            <button type="button" id="addFormBtn" class="btn btn-primary large">Добавить</button>
+        </div>
+    </form>
+{% endblock %}
+
+{% block javascript %}
+    <script type="text/javascript" src="/cms/js/jquery.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#addressSite').focus();
+            $('#checkFormBtn').click(function() {
+                window.siteList.checkUrl();
+            });
+            $('#addressSite').keydown(function(e) {
+                if (e.keyCode === 13) {
+                window.siteList.checkUrl();
+                }
+            });
+            $('#addFormBtn').click(function() {
+                window.siteList.saveForm();
+            });
+        });
+
+        var siteList = {
+            showMessages: function(msgArray) {
+                    $('#results').html(msgArray['message']);
+
+                    if (msgArray['result'] == 'ok') {
+                        $('#results').removeClass("alert-danger");
+                        $('#results').addClass("alert alert-success");
+                        window.siteList.showForm();
+                    } else if (msgArray['result'] == 'error') {
+                        $('#results').removeClass("alert-success");
+                        $('#results').addClass("alert alert-danger");
+                    }
+            },
+            showForm: function() {
+                    $('#fullForm').removeClass("hidden");
+                    $('#checkFormBtn').addClass("hidden");
+            },
+            saveForm : function(){
+                        addressSite = $('#addressSite').val();
+                        kindOfActivitiesSite = $('#kindOfActivitiesSite').val();
+                        emailSite = $('#emailSite').val();
+                        phoneSite = $('#phoneSite').val();
+                        $.ajax({
+                            type: "POST",
+                            url: "/admin/shops-list/save",
+                            data: {
+                                addressSite: addressSite,
+                                kindOfActivitiesSite: kindOfActivitiesSite,
+                                emailSite: emailSite,
+                                phoneSite: phoneSite
+                            },
+                            success: function (answer) {
+                                resultAnswer = JSON.parse(answer);
+                                window.siteList.showMessages(resultAnswer);
+
+                                if (resultAnswer['result'] != 'error') {
+                                    window.siteList.hideForm();
+                                    $('#addressSite').focus();
+                                }
+                            }
+                        });
+            },
+            hideForm: function() {
+                    $('#addressSite').val('');
+                    $('#kindOfActivitiesSite').val('');
+                    $('#emailSite').val('');
+                    $('#phoneSite').val('');
+                    $('#fullForm').addClass("hidden");
+                    $('#checkFormBtn').removeClass("hidden");
+            },
+            checkUrl: function() {
+                    var addressSite = $('#addressSite').val();
+                    $.ajax({
+                        type: "POST",
+                        url: "/admin/shops-list/check",
+                        data: { addressSite: addressSite },
+                        success: function(html){
+                            result = JSON.parse(html);
+                            if (result['result'] == 'error') {
+                                window.siteList.showMessages(result);
+                                $('#addressSite').val('');
+                                $('#addressSite').focus();
+                            } if (result['result'] == 'ok'){
+                                window.siteList.showMessages(result);
+                                $('#kindOfActivitiesSite').focus();
+                            }
+                        }
+                    });
+            }
+        };
+    </script>
+{% endblock %}
+
+{% block css %}
+    <style>
+        .results {
+            font-weight: bold; font-size: 14px; text-align: center;
+        }
+        .check_url label {
+            display: inline-block;
+            padding-right: 10px;
+        }
+        .check_url input {
+            margin-right: 10px;
+        }
+        .full_form {
+            margin-top: 10px;
+        }
+        .full_form fieldset {
+            margin-bottom: 10px;
+        }
+    </style>
+{% endblock %}
